@@ -51,6 +51,9 @@ public class LoginActivity extends BaseActivity {
         if (!UserUtils.validateLogin(this,phone,pass)){
             return;
         }
+
+
+
         //跳转到主页面去
         Intent intent = new Intent(this,MainActivity.class);
         startActivity(intent);

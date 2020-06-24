@@ -34,19 +34,16 @@ public class RegisterActivity extends BaseActivity {
         mPass_one = fd(R.id.input_password_one);
     }
 
-
+    /**
+     * 注册点击事件
+     * @param view
+     */
     public void onRegister(View view){
         String phone = mPhone.getInputStr();
         String pass = mPass.getInputStr();
         String pass_one = mPass_one.getInputStr();
-        if (!UserUtils.validateLogin(this,phone,pass)){
-            return;
-        }
-        if (!pass.equals(pass_one)){
-            Toast.makeText(this,"两次输入的密码不同，请重新输入！",Toast.LENGTH_SHORT).show();
-            return;
-        }
-        Toast.makeText(this,"注册成功！",Toast.LENGTH_SHORT).show();
+        boolean result = UserUtils.register(this,phone,pass,pass_one);
+        if (!result)return;
         finish();
 
     }

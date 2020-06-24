@@ -8,6 +8,7 @@ package com.example.newdemo.activity;
  * 描述：TODO
  */
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -62,6 +63,13 @@ public class BaseActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 onBackPressed();
+            }
+        });
+
+        img_me.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(BaseActivity.this,MeActivity.class));
             }
         });
     }

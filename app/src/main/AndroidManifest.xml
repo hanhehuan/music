@@ -12,7 +12,11 @@
         android:roundIcon="@mipmap/logo"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activity.RegisterActivity"></activity>
+        <activity android:name=".activity.PlayMusicActivity"></activity>
+        <activity android:name=".activity.AlbumListActivity" />
+        <activity android:name=".activity.ChangePassActivity" />
+        <activity android:name=".activity.MeActivity" />
+        <activity android:name=".activity.RegisterActivity" />
         <activity android:name=".activity.LoginActivity" />
         <activity android:name=".activity.WelcomeActivity">
             <intent-filter>

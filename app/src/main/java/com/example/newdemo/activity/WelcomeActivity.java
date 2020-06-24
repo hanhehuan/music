@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.example.newdemo.R;
+import com.example.newdemo.utils.UserUtils;
 
 import java.sql.Time;
 import java.util.Timer;
@@ -33,12 +34,18 @@ public class WelcomeActivity extends BaseActivity{
     }
 
     private void init() {
+        boolean isLogin = UserUtils.validateUserLogin(this);
         mTimer = new Timer();
         mTimer.schedule(new TimerTask() {
             @Override
             public void run() {
                 Log.i("WelcomeActivity","当前线程是："+Thread.currentThread());
-                toLogin();
+                //toLogin();
+                if (isLogin){
+                    toMain();
+                }else {
+                    toLogin();
+                }
             }
         },3000);
     }
