@@ -11,6 +11,7 @@ package com.example.newdemo;
 import android.app.Application;
 
 import com.blankj.utilcode.util.Utils;
+import com.example.newdemo.helps.RealmHelp;
 
 import io.realm.Realm;
 
@@ -22,5 +23,7 @@ public class MyApplication extends Application {
 
         Utils.init(this);
         Realm.init(this);
+
+        RealmHelp.migration();
     }
 }

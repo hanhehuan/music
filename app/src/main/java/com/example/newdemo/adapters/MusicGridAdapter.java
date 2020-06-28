@@ -14,18 +14,26 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.newdemo.R;
 import com.example.newdemo.activity.AlbumListActivity;
+import com.example.newdemo.model.AlbumModel;
+
+import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class MusicGridAdapter extends RecyclerView.Adapter<MusicGridAdapter.ViewHolder>{
+
     private Context mcontext;
-    public MusicGridAdapter(Context context){
+    private List<AlbumModel> mDataSource;
+
+    public MusicGridAdapter(Context context,List<AlbumModel> mDataSource){
         this.mcontext = context;
+        mDataSource = mDataSource;
     }
 
     @NonNull
@@ -36,14 +44,22 @@ public class MusicGridAdapter extends RecyclerView.Adapter<MusicGridAdapter.View
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+
+        AlbumModel albumModel = mDataSource.get(position);
+
+
         Glide.with(mcontext)
                 .load("http://res.lgdsunday.club/poster-1.png")
                 .into(holder.ivIcon);
+
+        holder.mPlayNum.setText(albumModel.getPlayNum());
+        holder.mTvName.setText(albumModel.getName());
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(mcontext, AlbumListActivity.class);
+                intent.putExtra(AlbumListActivity.ALBUM_ID,albumModel.getAlbumId());
                 mcontext.startActivity(intent);
             }
         });
@@ -52,18 +68,21 @@ public class MusicGridAdapter extends RecyclerView.Adapter<MusicGridAdapter.View
 
     @Override
     public int getItemCount() {
-        return 0;
+        return mDataSource.size();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder{
 
         ImageView ivIcon;
         View itemView;
+        TextView mPlayNum,mTvName;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             this.itemView = itemView;
             ivIcon = itemView.findViewById(R.id.iv_icon);
+            mPlayNum = itemView.findViewById(R.id.tv_play_num);
+            mTvName = itemView.findViewById(R.id.tv_name);
         }
     }
 }

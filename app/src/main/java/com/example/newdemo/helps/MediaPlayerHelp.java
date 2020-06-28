@@ -15,6 +15,12 @@ import android.net.Uri;
 import java.io.IOException;
 import java.security.PublicKey;
 
+/**
+ * 1、直接在activity中创建播放音乐，音乐与activity绑定，activity运行时播放音乐，activity退出时音乐停止
+ * 2、通过全局单例类与application绑定，application运行时播放音乐，application停止时音乐停止
+ * 3、通过service进行音乐播放，service运行时音乐播放，service停止时音乐停止
+ */
+
 public class MediaPlayerHelp {
 
     private static MediaPlayerHelp instance;
@@ -50,17 +56,24 @@ public class MediaPlayerHelp {
      */
 
     public void setPath(String path){
-
-        mPath = path;
         /**
          * 1、音乐正在播放，重置音乐状态
          * 2、设置音乐播放路径
          * 3、准备播放
          */
-        //音乐正在播放，重置音乐状态
-        if (mediaPlayer.isPlaying()){
+        mPath = path;
+        /**
+         * （错误逻辑！）当进行音乐切换的时候如果音乐处于播放状态，则重置音乐状态
+         * 如果音乐不处于播放状态（暂停），则不重置
+         */
+
+        //音乐正在播放或者切换了音乐，重置音乐状态
+        if (mediaPlayer.isPlaying() || !path.equals(mPath) ){
             mediaPlayer.reset();
         }
+
+        mPath = path;
+
         //设置音乐播放路径
         try {
             mediaPlayer.setDataSource(mContext, Uri.parse(path));
@@ -74,6 +87,15 @@ public class MediaPlayerHelp {
             public void onPrepared(MediaPlayer mediaPlayer) {
                 if (lister != null){
                     lister.onPrepared(mediaPlayer);
+                }
+            }
+        });
+        //监听音乐播放完成
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mediaPlayer) {
+                if (lister != null){
+                    lister.onCompletion(mediaPlayer);
                 }
             }
         });
@@ -100,6 +122,7 @@ public class MediaPlayerHelp {
 
     public interface OnMediaPlayerHelperLister{
         void onPrepared(MediaPlayer mp);
+        void onCompletion(MediaPlayer mp);
     }
 
 }

@@ -67,7 +67,10 @@ public class UserUtils {
         }
         //保存用户标记
         UserHelp.getInstance().setPhone(phone);
+        //保存音乐源
+        realmHelp.setMusicSource(context);
 
+        realmHelp.close();
         return true;
     }
 
@@ -82,12 +85,19 @@ public class UserUtils {
             Toast.makeText(context,"系统错误，请稍后重试",Toast.LENGTH_SHORT).show();
             return;
         }
+
+        //删除音乐源
+        RealmHelp realmHelp = new RealmHelp();
+        realmHelp.removeMusicSource();
+        realmHelp.close();
+
         Intent intent = new Intent(context, LoginActivity.class);
         //设置intent标识符，清理task栈并且新生成一个新的task栈
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
         //定义activity跳转动画
         ((Activity)context).overridePendingTransition(R.anim.open_enter,R.anim.open_exit);
+
     }
 
     /**

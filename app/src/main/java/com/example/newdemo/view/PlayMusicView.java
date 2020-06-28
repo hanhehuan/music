@@ -8,9 +8,13 @@ package com.example.newdemo.view;
  * 描述：TODO
  */
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.media.MediaPlayer;
 import android.os.Build;
+import android.os.IBinder;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +26,8 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.example.newdemo.R;
 import com.example.newdemo.helps.MediaPlayerHelp;
+import com.example.newdemo.model.MusicModel;
+import com.example.newdemo.services.MusicService;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,10 +39,14 @@ public class PlayMusicView extends FrameLayout {
     private MediaPlayerHelp mediaPlayerHelp;
     private String mPath;
     private View mView;
-    private boolean isPlay;
+    private boolean isPlay,isService;
     private FrameLayout mFlPlayMusic;
     private ImageView ivIcon,ivNeedle,ivPlay;
     private Animation mPlayMusicAnim,mPlayNeedleAnim,mStopNeedleAnim;
+
+    private Intent mIntentService;
+    private MusicService.MusicBind musicBind;
+    private MusicModel musicModel;
 
     public PlayMusicView(@NonNull Context context) {
         super(context);
@@ -90,7 +100,7 @@ public class PlayMusicView extends FrameLayout {
 
         addView(mView);
 
-        mediaPlayerHelp = MediaPlayerHelp.getInstance(mContenx);
+
     }
 
     /**
@@ -100,27 +110,29 @@ public class PlayMusicView extends FrameLayout {
         if (isPlay){
             stopPlay();
         }else {
-            playMusic(mPath);
+            playMusic();
         }
     }
 
     /**
      * 播放音乐
      */
-    public void playMusic(String path){
-        mPath = path;
+    public void playMusic(){
+
 
         isPlay = true;
         ivPlay.setVisibility(View.GONE);
         mFlPlayMusic.startAnimation(mPlayMusicAnim);
         ivNeedle.startAnimation(mPlayNeedleAnim);
 
+        startMusicService();
+
         /**
          * 播放音乐
          * 1、判断当前音乐是否已经在播放
          * 2、如果当前已经在播放，自己执行start方法
          * 3、如果当前播放的音乐不是需要播放的音乐的话，那么就调用setpath方法
-         */
+         *//*
 
         if (mediaPlayerHelp.getPath() != null && path.equals(mediaPlayerHelp.getPath())){
             mediaPlayerHelp.start();
@@ -132,7 +144,7 @@ public class PlayMusicView extends FrameLayout {
                     mediaPlayerHelp.start();
                 }
             });
-        }
+        }*/
     }
 
     /**
@@ -143,17 +155,64 @@ public class PlayMusicView extends FrameLayout {
         ivPlay.setVisibility(View.VISIBLE);
         mFlPlayMusic.clearAnimation();
         ivNeedle.startAnimation(mStopNeedleAnim);
-
-        mediaPlayerHelp.pause();
+        if (musicBind != null)
+        musicBind.stopMusic();
+        //mediaPlayerHelp.pause();
     }
 
     /**
      * 设置光盘中显示的音乐封面图片
-     * @param icon
+     * @param
      */
-    public void setMusicIcon(String icon){
+    public void setMusicIcon(){
         Glide.with(mContenx)
-                .load(icon)
+                .load(musicModel.getPoster())
                 .into(ivIcon);
     }
+
+    public void setMusic(MusicModel music){
+        musicModel = music;
+        setMusicIcon();
+    }
+
+    /**
+     * 启动音乐服务
+     */
+    private void startMusicService(){
+        if (mIntentService == null){
+            mIntentService = new Intent(mContenx, MusicService.class);
+            mContenx.startService(mIntentService);
+        }else {
+            musicBind.playMusic();
+        }
+        //绑定service
+        if (!isService){
+            isService = true;
+            mContenx.bindService(mIntentService,connection,Context.BIND_AUTO_CREATE);
+        }
+    }
+
+    /**
+     * 接触绑定
+     */
+    public void destory(){
+        if (isService){
+            isService = false;
+            mContenx.unbindService(connection);
+        }
+    }
+
+    ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+                musicBind = (MusicService.MusicBind) iBinder;
+                musicBind.setMusic(musicModel);
+                musicBind.playMusic();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+
+        }
+    };
 }

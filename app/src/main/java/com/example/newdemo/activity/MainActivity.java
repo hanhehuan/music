@@ -15,6 +15,8 @@ import android.widget.Button;
 import com.example.newdemo.R;
 import com.example.newdemo.adapters.MusicGridAdapter;
 import com.example.newdemo.adapters.MusicListAdapter;
+import com.example.newdemo.helps.RealmHelp;
+import com.example.newdemo.model.MusicSourceModel;
 import com.example.newdemo.utils.OkHttpUtils;
 import com.example.newdemo.utils.ResultData;
 import com.example.newdemo.utils.ResultUtil;
@@ -27,6 +29,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private RecyclerView mRvGrid,mRvList;
     private MusicGridAdapter mGridAdapter;
     private MusicListAdapter mListAdapter;
+    private RealmHelp realmHelp;
+    private MusicSourceModel musicSourceModel;;
     //private OkHttpUtils okHttpUtils;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,8 +51,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 ResultData resultData = new Gson().fromJson(e,ResultData.class);
             }
         });*/
-
+        initData();
         initView();
+    }
+
+    private void initData(){
+        realmHelp = new RealmHelp();
+        musicSourceModel = realmHelp.getMusicSourceModel();
+
     }
 
     private void initView() {
@@ -58,7 +68,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         mRvGrid.setLayoutManager(new GridLayoutManager(this,3));
         mRvGrid.addItemDecoration(new GridSpaceItemDecoration(getResources().getDimensionPixelSize(R.dimen.albumMarginSize),mRvGrid));
         mRvGrid.setNestedScrollingEnabled(false);
-        mGridAdapter = new MusicGridAdapter(this);
+        mGridAdapter = new MusicGridAdapter(this,musicSourceModel.getAlbum());
         mRvGrid.setAdapter(mGridAdapter);
         /**
          * 1、加入已知列表高度的情况下，可以直接在布局中吧recyclerview的高度定义上
@@ -69,7 +79,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         mRvList.setLayoutManager(new LinearLayoutManager(this));
         mRvList.addItemDecoration(new DividerItemDecoration(this,DividerItemDecoration.VERTICAL));
         mRvGrid.setNestedScrollingEnabled(false);
-        mListAdapter = new MusicListAdapter(this,mRvList);
+        mListAdapter = new MusicListAdapter(this,mRvList,musicSourceModel.getHot());
         mRvList.setAdapter(mListAdapter);
 
     }
@@ -86,6 +96,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             okHttpUtils.cancelHttp();//取消执行请求
             okHttpUtils = null;
         }*/
+
         super.onDestroy();
+        realmHelp.close();
     }
 }
