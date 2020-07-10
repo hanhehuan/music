@@ -42,7 +42,7 @@ public class RegisterActivity extends BaseActivity {
         String phone = mPhone.getInputStr();
         String pass = mPass.getInputStr();
         String pass_one = mPass_one.getInputStr();
-        boolean result = UserUtils.register(this,phone,pass,pass_one);
+        boolean result = UserUtils.registerUser(this,phone,pass,pass_one);
         if (!result)return;
         finish();
 

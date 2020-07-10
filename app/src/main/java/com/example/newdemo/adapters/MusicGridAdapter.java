@@ -26,41 +26,40 @@ import java.util.List;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class MusicGridAdapter extends RecyclerView.Adapter<MusicGridAdapter.ViewHolder>{
+public class MusicGridAdapter extends RecyclerView.Adapter<MusicGridAdapter.ViewHolder> {
 
-    private Context mcontext;
+    private Context mContext;
     private List<AlbumModel> mDataSource;
 
-    public MusicGridAdapter(Context context,List<AlbumModel> mDataSource){
-        this.mcontext = context;
-        mDataSource = mDataSource;
+    public MusicGridAdapter (Context context, List<AlbumModel> dataSource) {
+        mContext = context;
+        this.mDataSource = dataSource;
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new ViewHolder(LayoutInflater.from(mcontext).inflate(R.layout.item_grid_music,parent,false));
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+        return new ViewHolder(LayoutInflater.from(mContext).inflate(R.layout.item_grid_music, viewGroup, false));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
 
-        AlbumModel albumModel = mDataSource.get(position);
+        final AlbumModel albumModel = mDataSource.get(i);
 
+        Glide.with(mContext)
+                .load(albumModel.getPoster())
+                .into(viewHolder.ivIcon);
 
-        Glide.with(mcontext)
-                .load("http://res.lgdsunday.club/poster-1.png")
-                .into(holder.ivIcon);
+        viewHolder.mTvPlayNum.setText(albumModel.getPlayNum());
+        viewHolder.mTvName.setText(albumModel.getName());
 
-        holder.mPlayNum.setText(albumModel.getPlayNum());
-        holder.mTvName.setText(albumModel.getName());
-
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
+        viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(mcontext, AlbumListActivity.class);
-                intent.putExtra(AlbumListActivity.ALBUM_ID,albumModel.getAlbumId());
-                mcontext.startActivity(intent);
+            public void onClick(View v) {
+                Intent intent = new Intent(mContext, AlbumListActivity.class);
+                intent.putExtra(AlbumListActivity.ALBUM_ID, albumModel.getAlbumId());
+                mContext.startActivity(intent);
             }
         });
 
@@ -71,17 +70,18 @@ public class MusicGridAdapter extends RecyclerView.Adapter<MusicGridAdapter.View
         return mDataSource.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder{
+    class ViewHolder extends RecyclerView.ViewHolder {
 
         ImageView ivIcon;
         View itemView;
-        TextView mPlayNum,mTvName;
+        TextView mTvPlayNum, mTvName;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+
             this.itemView = itemView;
             ivIcon = itemView.findViewById(R.id.iv_icon);
-            mPlayNum = itemView.findViewById(R.id.tv_play_num);
+            mTvPlayNum = itemView.findViewById(R.id.tv_play_num);
             mTvName = itemView.findViewById(R.id.tv_name);
         }
     }

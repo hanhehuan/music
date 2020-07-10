@@ -21,60 +21,63 @@ public class PlayMusicActivity extends BaseActivity {
 
     public static final String MUSIC_ID = "musicId";
 
-    private ImageView ivBg;
+    private ImageView mIvBg;
+    private TextView mTvName, mTvAuthor;
     private PlayMusicView mPlayMusicView;
-    private RealmHelp realmHelp;
-    private MusicModel musicModel;
     private String mMusicId;
-    private TextView mName,mAuthor;
+    private RealmHelp mRealmHelper;
+    private MusicModel mMusicModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play_music);
-        //隐藏statusbar
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
+//        隐藏statusBar
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        initData();
         initView();
     }
 
-    private void initData(){
+    private void initData () {
         mMusicId = getIntent().getStringExtra(MUSIC_ID);
-        realmHelp = new RealmHelp();
-        musicModel = realmHelp.getMusic(mMusicId);
-
+        mRealmHelper = new RealmHelp();
+        mMusicModel = mRealmHelper.getMusic(mMusicId);
     }
 
-    private void initView(){
-        ivBg = fd(R.id.iv_bg);
-        mName = fd(R.id.tv_name);
-        mAuthor=fd(R.id.tv_author);
-        //glid-tranformations
-        //"http://res.lgdsunday.club/poster-1.png"
-        Glide.with(this)
-                .load(musicModel.getPoster())
-                .apply(RequestOptions.bitmapTransform(new BlurTransformation(25,10)))
-                .into(ivBg);
+    private void initView () {
+        mIvBg = fd(R.id.iv_bg);
+        mTvName = fd(R.id.tv_name);
+        mTvAuthor = fd(R.id.tv_author);
 
-        mName.setText(musicModel.getName());
-        mAuthor.setText(musicModel.getAuthor());
+        //        glide-transformations
+        Glide.with(this)
+                .load(mMusicModel.getPoster())
+                .apply(RequestOptions.bitmapTransform(new BlurTransformation(25, 10)))
+                .into(mIvBg);
+        mTvName.setText(mMusicModel.getName());
+        mTvAuthor.setText(mMusicModel.getAuthor());
 
         mPlayMusicView = fd(R.id.play_music_view);
-        //"http://res.lgdsunday.club/poster-1.png"
-        mPlayMusicView.setMusicIcon();
-        mPlayMusicView.setMusic(musicModel);
-        //"http://res.lgdsunday.club/Nostalgic%20Piano.mp3"
+//        mPlayMusicView.setMusicIcon(mMusicModel.getPoster());
+        mPlayMusicView.setMusic(mMusicModel);
         mPlayMusicView.playMusic();
     }
 
-    public void onBackClick(View view){
+
+    /**
+     * 后退按钮点击事件
+     */
+    public void onBackClick(View view) {
         onBackPressed();
     }
+
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mPlayMusicView.destory();
-        realmHelp.close();
+        mPlayMusicView.destroy();
+        mRealmHelper.close();
     }
 }

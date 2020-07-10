@@ -12,8 +12,7 @@ import com.example.newdemo.view.InputView;
 
 public class LoginActivity extends BaseActivity {
 
-    private InputView mPhone;
-    private InputView mPass;
+    private InputView mInputPhone, mInputPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,42 +20,43 @@ public class LoginActivity extends BaseActivity {
         setContentView(R.layout.activity_login);
 
         initView();
-        initData();
-    }
-
-
-    private void initView() {
-        initNavBar(false,"登录",false);//设置头部
-        mPhone = fd(R.id.input_phone);
-        mPass = fd(R.id.input_password);
-    }
-    private void initData() {
-
     }
 
     /**
-     * 跳转到注册页面
+     * 初始化View
      */
-    public void onRegisterClick(View view){
-        startActivity(new Intent(this,RegisterActivity.class));
+    private void initView () {
+        initNavBar(false, "登录", false);
+
+        mInputPhone = fd(R.id.input_phone);
+        mInputPassword = fd(R.id.input_password);
+    }
+
+    /**
+     * 跳转注册页面点击事件
+     */
+    public void onRegisterClick (View v) {
+        Intent intent = new Intent(this, RegisterActivity.class);
+        startActivity(intent);
     }
 
     /**
      * 登录
      */
-    public void onCommitClick(View view){
-        String phone = mPhone.getInputStr();
-        String pass = mPass.getInputStr();
-        //验证用户输入是否合法
-        if (!UserUtils.validateLogin(this,phone,pass)){
+    public void onCommitClick (View v) {
+
+        String phone = mInputPhone.getInputStr();
+        String password = mInputPassword.getInputStr();
+
+//        验证用户输入是否合法
+        if (!UserUtils.validateLogin(this, phone, password)) {
             return;
         }
 
-
-
-        //跳转到主页面去
-        Intent intent = new Intent(this,MainActivity.class);
+//        跳转到应用主页
+        Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
         finish();
+
     }
 }

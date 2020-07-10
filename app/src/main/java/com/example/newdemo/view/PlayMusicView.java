@@ -35,18 +35,19 @@ import androidx.annotation.RequiresApi;
 
 public class PlayMusicView extends FrameLayout {
 
-    private Context mContenx;
-    private MediaPlayerHelp mediaPlayerHelp;
-    private String mPath;
-    private View mView;
-    private boolean isPlay,isService;
-    private FrameLayout mFlPlayMusic;
-    private ImageView ivIcon,ivNeedle,ivPlay;
-    private Animation mPlayMusicAnim,mPlayNeedleAnim,mStopNeedleAnim;
+    private Context mContext;
 
-    private Intent mIntentService;
-    private MusicService.MusicBind musicBind;
-    private MusicModel musicModel;
+    private MusicModel mMusicModel;
+    private MusicService.MusicBind mMusicBinder;
+    private Intent mServiceIntent;
+    private boolean isPlaying, isBindService;
+    private View mView;
+    private FrameLayout mFlPlayMusic;
+    private ImageView mIvIcon , mIvNeedle, mIvPlay;
+
+    private Animation mPlayMusicAnim, mPlayNeedleAnim, mStopNeedleAnim;
+
+
 
     public PlayMusicView(@NonNull Context context) {
         super(context);
@@ -69,47 +70,45 @@ public class PlayMusicView extends FrameLayout {
         init(context);
     }
 
-    private void init(Context context){
-        //mediaplayer
+    private void init (Context context) {
+//        MediaPlayer
+        mContext = context;
 
+        mView = LayoutInflater.from(mContext).inflate(R.layout.play_music, this, false);
 
-        mContenx = context;
-        mView = LayoutInflater.from(mContenx).inflate(R.layout.play_music,this,false);
         mFlPlayMusic = mView.findViewById(R.id.fl_play_music);
         mFlPlayMusic.setOnClickListener(new OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View v) {
                 trigger();
             }
         });
-        ivIcon = mView.findViewById(R.id.iv_icon);
-        ivNeedle = mView.findViewById(R.id.iv_needle);
-        ivPlay = mView.findViewById(R.id.iv_play);
+        mIvIcon = mView.findViewById(R.id.iv_icon);
+        mIvNeedle = mView.findViewById(R.id.iv_needle);
+        mIvPlay = mView.findViewById(R.id.iv_play);
 
-        //1、定义所要执行的动画
-        //1、1光盘转动所要执行的动画
-        //1、2指针指向光盘的动画
-        //1、3指针离开光盘的动画
-        //2、startAnimation
+        /**
+         * 1、定义所需要执行的动画
+         *      1、光盘转动的动画
+         *      2、指针指向光盘的动画
+         *      3、指针离开光盘的动画
+         * 2、startAnimation
+         */
 
-        mPlayMusicAnim = AnimationUtils.loadAnimation(mContenx,R.anim.play_music_anim);
-        mPlayNeedleAnim = AnimationUtils.loadAnimation(mContenx,R.anim.play_needle_anim);
-        mStopNeedleAnim = AnimationUtils.loadAnimation(mContenx,R.anim.stop_needle_anim);
-
-
+        mPlayMusicAnim = AnimationUtils.loadAnimation(mContext, R.anim.play_music_anim);
+        mPlayNeedleAnim = AnimationUtils.loadAnimation(mContext, R.anim.play_needle_anim);
+        mStopNeedleAnim = AnimationUtils.loadAnimation(mContext, R.anim.stop_needle_anim);
 
         addView(mView);
-
-
     }
 
     /**
      * 切换播放状态
      */
-    private void trigger(){
-        if (isPlay){
-            stopPlay();
-        }else {
+    private void trigger () {
+        if (isPlaying) {
+            stopMusic();
+        } else {
             playMusic();
         }
     }
@@ -117,101 +116,90 @@ public class PlayMusicView extends FrameLayout {
     /**
      * 播放音乐
      */
-    public void playMusic(){
-
-
-        isPlay = true;
-        ivPlay.setVisibility(View.GONE);
+    public void playMusic () {
+        isPlaying = true;
+        mIvPlay.setVisibility(View.GONE);
         mFlPlayMusic.startAnimation(mPlayMusicAnim);
-        ivNeedle.startAnimation(mPlayNeedleAnim);
+        mIvNeedle.startAnimation(mPlayNeedleAnim);
 
+//        启动服务
         startMusicService();
 
-        /**
-         * 播放音乐
-         * 1、判断当前音乐是否已经在播放
-         * 2、如果当前已经在播放，自己执行start方法
-         * 3、如果当前播放的音乐不是需要播放的音乐的话，那么就调用setpath方法
-         *//*
-
-        if (mediaPlayerHelp.getPath() != null && path.equals(mediaPlayerHelp.getPath())){
-            mediaPlayerHelp.start();
-        }else {
-            mediaPlayerHelp.setPath(path);
-            mediaPlayerHelp.setLister(new MediaPlayerHelp.OnMediaPlayerHelperLister() {
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    mediaPlayerHelp.start();
-                }
-            });
-        }*/
     }
 
     /**
      * 停止播放
      */
-    public void stopPlay(){
-        isPlay = false;
-        ivPlay.setVisibility(View.VISIBLE);
+    public void stopMusic () {
+        isPlaying = false;
+        mIvPlay.setVisibility(View.VISIBLE);
         mFlPlayMusic.clearAnimation();
-        ivNeedle.startAnimation(mStopNeedleAnim);
-        if (musicBind != null)
-        musicBind.stopMusic();
-        //mediaPlayerHelp.pause();
+        mIvNeedle.startAnimation(mStopNeedleAnim);
+
+        mMusicBinder.stopMusic();
     }
 
     /**
      * 设置光盘中显示的音乐封面图片
-     * @param
      */
-    public void setMusicIcon(){
-        Glide.with(mContenx)
-                .load(musicModel.getPoster())
-                .into(ivIcon);
+    private void setMusicIcon () {
+        Glide.with(mContext)
+                .load(mMusicModel.getPoster())
+                .into(mIvIcon);
     }
 
-    public void setMusic(MusicModel music){
-        musicModel = music;
+    /**
+     * 设置音乐播放模型
+     */
+    public void setMusic (MusicModel musicModel) {
+        this.mMusicModel = musicModel;
+
         setMusicIcon();
     }
+
 
     /**
      * 启动音乐服务
      */
-    private void startMusicService(){
-        if (mIntentService == null){
-            mIntentService = new Intent(mContenx, MusicService.class);
-            mContenx.startService(mIntentService);
-        }else {
-            musicBind.playMusic();
+    private void startMusicService () {
+
+        if (mServiceIntent == null) {
+            mServiceIntent = new Intent(mContext, MusicService.class);
+            mContext.startService(mServiceIntent);
+        } else {
+            mMusicBinder.playMusic();
         }
-        //绑定service
-        if (!isService){
-            isService = true;
-            mContenx.bindService(mIntentService,connection,Context.BIND_AUTO_CREATE);
+
+
+//        当前未绑定，绑定服务，同时修改绑定状态
+        if (!isBindService) {
+            isBindService = true;
+            mContext.bindService(mServiceIntent, conn, Context.BIND_AUTO_CREATE);
         }
     }
 
     /**
-     * 接触绑定
+     * 销毁方法，需要在 activity 被销毁的时候调用
      */
-    public void destory(){
-        if (isService){
-            isService = false;
-            mContenx.unbindService(connection);
+    public void destroy () {
+//        如果已绑定服务，则解除绑定，同时修改绑定状态
+        if (isBindService) {
+            isBindService = false;
+            mContext.unbindService(conn);
         }
+
     }
 
-    ServiceConnection connection = new ServiceConnection() {
+    ServiceConnection conn = new ServiceConnection() {
         @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-                musicBind = (MusicService.MusicBind) iBinder;
-                musicBind.setMusic(musicModel);
-                musicBind.playMusic();
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mMusicBinder = (MusicService.MusicBind) service;
+            mMusicBinder.setMusic(mMusicModel);
+            mMusicBinder.playMusic();
         }
 
         @Override
-        public void onServiceDisconnected(ComponentName componentName) {
+        public void onServiceDisconnected(ComponentName name) {
 
         }
     };
