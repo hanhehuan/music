@@ -198,20 +198,23 @@ public class RealmHelp {
      * 返回音乐源数据
      */
     public MusicSourceModel getMusicSource () {
-        return mRealm.where(MusicSourceModel.class).findFirst();
+        MusicSourceModel model1 =  mRealm.where(MusicSourceModel.class).findFirst();
+        return mRealm.copyFromRealm(model1);
     }
 
     /**
      * 返回歌单
      */
     public AlbumModel getAlbum (String albumId) {
-        return mRealm.where(AlbumModel.class).equalTo("albumId", albumId).findFirst();
+        AlbumModel albumModel1 = mRealm.where(AlbumModel.class).equalTo("albumId", albumId).findFirst();
+        return mRealm.copyFromRealm(albumModel1);
     }
 
     /**
      * 返回音乐
      */
     public MusicModel getMusic (String musicId) {
-        return mRealm.where(MusicModel.class).equalTo("musicId", musicId).findFirst();
+        MusicModel musicModel1 = mRealm.where(MusicModel.class).equalTo("musicId", musicId).findFirst();
+        return mRealm.copyFromRealm(musicModel1);
     }
 }
